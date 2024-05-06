@@ -2,84 +2,91 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+
+        String secretCode = newCodeGenerator();
+        System.out.println("The secret code is " + secretCode);
+        playGame(secretCode);
+    }
+
+    public static String newCodeGenerator() {
         Scanner sc = new Scanner(System.in);
-        int lengthSecret = 0;
+
+        int lengthCode = 0;
         StringBuilder secret = new StringBuilder();
 
         do {
             System.out.print("Enter a new number: ");
-            lengthSecret = sc.nextInt();
+            lengthCode = sc.nextInt();
 
-            if(lengthSecret <= 10) {
+            if(lengthCode <= 10) {
                 break;
             }
 
-            System.out.println("Error: can't generate a secret number with a length of " + lengthSecret + " because there aren't enough unique digits.");
+            System.out.println("Error: can't generate a secret number with a length of " + lengthCode + " because there aren't enough unique digits.");
             System.out.println();
-        } while(lengthSecret > 10);
+        } while(lengthCode > 10);
 
-        // iterate through the random number from right to left, and add it to our secret code as long as it's unique (0 to 9) and doesn't start with 0
-        while (secret.length() != lengthSecret){
+        // iterate through the code length entered by the user (right to left)
+        while(secret.length() != lengthCode) {
             // generate a random number (using nanoTime for example)
             long randomNumber = System.nanoTime();
             String randomNumberStr = String.valueOf(randomNumber);
 
-            // iterate through the String version of randomNumber from right to left
-            for (int i = 0; i < randomNumberStr.length(); i++) {
-                // our secret code is made and done, exist condition
-                if (secret.length() == lengthSecret) {
+            for (int i = randomNumberStr.length() - 1; i >= 0; i--) {
+                // break condition
+                if (secret.length() == lengthCode) {
                     break;
                 }
 
-                // converting String ot int (right to left)
-                int number = Character.getNumericValue(randomNumberStr.charAt(randomNumberStr.length() - 1 - i));
-                if (secret.isEmpty() && number == 0) {
-                    // skip it
-                    continue;
-                } else {
-                    // check if it's unique
+                int number = Character.getNumericValue(randomNumberStr.charAt(i));
 
-                    // convert the number into a String and check if it already exists
-                    if (!secret.toString().contains(String.valueOf(number))){
-                        // add number to our secret random number
-                        secret.append(number);
-                    }
+                if(secret.isEmpty() && number == 0) {
+                    continue; // skip if the first number is 0 and secret is still empty (code can't start with 0)
+                }
+
+                // check if number doesn't exist in the secret code already, and add it (secret code has to have unique numbers)
+                if (!secret.toString().contains(String.valueOf(number))) {
+                    secret.append(number);
                 }
             }
         }
 
-        System.out.println("The random secret number is " + secret);
-
+        // return secret code
+        return secret.toString();
     }
 
-    public void grader() {
-        char[] secret = {'9', '3', '0', '4'};
-        Scanner sc = new Scanner(System.in);
-
-        System.out.print("Enter your number: ");
-        String input = sc.nextLine();
-
-        char[] inputChar = input.toCharArray();
+    public static void grader(String secretCode, String userInput) {
 
         int bulls = 0;
         int cows = 0;
 
+        // create arrays to mark matched positions and avoid checking the same character again
+        boolean[] secretMatched = new boolean[secretCode.length()];
+        boolean[] guessMatched = new boolean[secretCode.length()];
 
-        for (int i = 0; i < secret.length; i++) {
-            for (int j = 0; j < inputChar.length; j++) {
-                if (secret[i] == inputChar[j]) {
-                    if (i == j) {
-                        // found a bull
-                        bulls += 1;
-                        break;
-                    } else {
-                        // found a cow
-                        cows += 1;
-                        break;
+        // first pass, count bulls
+        for (int i = 0; i < secretCode.length(); i++) {
+            if (secretCode.charAt(i) == userInput.charAt(i)) {
+                secretMatched[i] = true;
+                guessMatched[i] = true;
+                bulls++;
+            }
+        }
+
+        // second pass, count cows
+        for (int i = 0; i < secretCode.length(); i++) {
+            // iterate through the secretMatched positions that are still False
+            if (!secretMatched[i]) {
+                for (int j = 0; j < userInput.length(); j++) {
+                    if (!guessMatched[j] && secretCode.charAt(i) == userInput.charAt(j)) {
+                        cows++;
+                        guessMatched[j] = true; // mark as matched
+                        break; // stop looking for other matches for this character
                     }
                 }
             }
         }
+
         String grade = "";
 
         if (bulls == 0 && cows == 0) {
@@ -92,9 +99,30 @@ public class Main {
             grade = bulls + " bull(s)" + " and " + cows + " cow(s). ";
         }
 
-        String secretCodeMessage = "The secret code is " + String.valueOf(secret);
+//        String secretCodeMessage = "The secret code is " + String.valueOf(secret);
         String gradeMessage = "Grade: " + grade;
 
-        System.out.println(gradeMessage + secretCodeMessage);
+        System.out.println(gradeMessage);
+    }
+
+    public static void playGame(String secretCode) {
+        int turnNumber = 0;
+        String userInput;
+
+        System.out.println("Okay, let's start a game!");
+
+        Scanner sc = new Scanner(System.in);
+
+        do {
+            System.out.println("Turn " + ++turnNumber + ":");
+            userInput = sc.nextLine();
+
+            // Do Later: Check validity of userInput
+
+            grader(secretCode, userInput);
+        } while(!userInput.equals(secretCode));
+
+        System.out.println("Congratulations! You guessed the secret code");
+
     }
 }
