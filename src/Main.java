@@ -1,10 +1,11 @@
 import java.util.Scanner;
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
 
         String secretCode = newCodeGenerator();
-        System.out.println("The secret code is " + secretCode);
+//        System.out.println("The secret code is " + secretCode); // only for testing purposes
         playGame(secretCode);
     }
 
@@ -26,33 +27,32 @@ public class Main {
             System.out.println();
         } while(lengthCode > 10);
 
-        // iterate through the code length entered by the user (right to left)
+        Random rand = new Random();
+        int lower = 0;
+        int higher = 9;
+
+        // construct the secret code based on the conditions (can only contain unique numbers (0-9) and doesn't start with a 0)
         while(secret.length() != lengthCode) {
             // generate a random number (using nanoTime for example)
-            long randomNumber = System.nanoTime();
-            String randomNumberStr = String.valueOf(randomNumber);
+            int randomNumber = rand.nextInt((higher - lower + 1) + lower); // get a random number between 0 and 9
 
-            for (int i = randomNumberStr.length() - 1; i >= 0; i--) {
-                // break condition
-                if (secret.length() == lengthCode) {
-                    break;
-                }
+            // break condition
+            if (secret.length() == lengthCode) {
+                break;
+            }
 
-                int number = Character.getNumericValue(randomNumberStr.charAt(i));
+            if(secret.isEmpty() && randomNumber == 0) {
+                continue; // skip if the first number is 0 and secret is still empty (code can't start with 0)
+            }
 
-                if(secret.isEmpty() && number == 0) {
-                    continue; // skip if the first number is 0 and secret is still empty (code can't start with 0)
-                }
-
-                // check if number doesn't exist in the secret code already, and add it (secret code has to have unique numbers)
-                if (!secret.toString().contains(String.valueOf(number))) {
-                    secret.append(number);
-                }
+            // check if number doesn't exist in the secret code already, and add it (secret code has to have unique numbers)
+            if (!secret.toString().contains(String.valueOf(randomNumber))) {
+                secret.append(randomNumber);
             }
         }
 
         // return secret code
-        return secret.toString();
+        return String.valueOf(secret);
     }
 
     public static void grader(String secretCode, String userInput) {
