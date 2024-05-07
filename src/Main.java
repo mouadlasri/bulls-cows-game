@@ -2,11 +2,11 @@
 import java.util.Scanner;
 import java.util.Random;
 
+
 public class Main {
     public static void main(String[] args) {
 
         String secretCode = newCodeGenerator();
-
 //        System.out.println("The secret code is " + secretCode); // only for testing purposes
         playGame(secretCode);
     }
@@ -16,34 +16,56 @@ public class Main {
 
         int lengthCode = 0;
         int lengthPossibleSymbols = 0;
-
+        String input;
         StringBuilder secret = new StringBuilder();
 
         // Get length of code from user (has to be between 0 and 36, ie: 10 numbers + 26 letters)
         do {
-            System.out.print("Enter a new number: ");
-            lengthCode = sc.nextInt();
+            System.out.print("Input the length of the secret code: ");
+            input = sc.nextLine();
 
-            if(lengthCode <= 36) {
+            if (isNumber(input)) {
+                lengthCode = Integer.parseInt(input);
+            } else {
+                System.out.println("Error: " + input + " isn't a valid number");
+                System.exit(0); // only for the sake of task #7
+            }
+
+            if(lengthCode <= 36 && lengthCode > 0) {
                 break;
             }
 
+
             System.out.println("Error: can't generate a secret number with a length of " + lengthCode + " because there aren't enough unique digits and characters.");
             System.out.println();
-        } while(lengthCode > 36);
+            System.exit(0); // only for the sake of task #7
+        } while(lengthCode > 36 || lengthCode <= 0);
 
         // Get number of possible symbols
         do {
             System.out.print("Input the number of possible symbols in the code: ");
-            lengthPossibleSymbols = sc.nextInt();
+            input = sc.nextLine();
 
-            if (lengthPossibleSymbols <= 36) {
+            if (isNumber(input)) {
+                lengthPossibleSymbols = Integer.parseInt(input);
+            } else {
+                System.out.println("Error: " + input + " isn't a valid number");
+                System.exit(0);
+            }
+
+            if (lengthPossibleSymbols <= 36 && lengthPossibleSymbols > 0) {
                 break;
             }
 
-            System.out.println("Error: can't generate a secret code with more than 36 symbols");
+            System.out.println("Error: maximum number of possible symbols in the code is 36 (0-9, a-z)");
             System.out.println();
-        } while(lengthPossibleSymbols > 36);
+            System.exit(0); // only for the sake of task #7
+        } while(lengthPossibleSymbols > 36 || lengthPossibleSymbols <= 0);
+
+        if (lengthCode > lengthPossibleSymbols) {
+            System.out.println("Error: it's not possible to generate a code with a length of " + lengthCode + " with " + lengthPossibleSymbols + " unique symbols.");
+            System.exit(0); // only for the sake of task #7
+        }
 
         CodeGenerator codeGenerator = new CodeGenerator(lengthCode, lengthPossibleSymbols);
         System.out.println(codeGenerator.getPreparationMessage());
@@ -119,5 +141,15 @@ public class Main {
 
         System.out.println("Congratulations! You guessed the secret code");
 
+    }
+
+    public static boolean isNumber(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if ( c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 }
