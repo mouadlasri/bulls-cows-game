@@ -1,3 +1,4 @@
+
 import java.util.Scanner;
 import java.util.Random;
 
@@ -5,6 +6,7 @@ public class Main {
     public static void main(String[] args) {
 
         String secretCode = newCodeGenerator();
+
 //        System.out.println("The secret code is " + secretCode); // only for testing purposes
         playGame(secretCode);
     }
@@ -13,46 +15,39 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         int lengthCode = 0;
+        int lengthPossibleSymbols = 0;
+
         StringBuilder secret = new StringBuilder();
 
+        // Get length of code from user (has to be between 0 and 36, ie: 10 numbers + 26 letters)
         do {
             System.out.print("Enter a new number: ");
             lengthCode = sc.nextInt();
 
-            if(lengthCode <= 10) {
+            if(lengthCode <= 36) {
                 break;
             }
 
-            System.out.println("Error: can't generate a secret number with a length of " + lengthCode + " because there aren't enough unique digits.");
+            System.out.println("Error: can't generate a secret number with a length of " + lengthCode + " because there aren't enough unique digits and characters.");
             System.out.println();
-        } while(lengthCode > 10);
+        } while(lengthCode > 36);
 
-        Random rand = new Random();
-        int lower = 0;
-        int higher = 9;
+        // Get number of possible symbols
+        do {
+            System.out.print("Input the number of possible symbols in the code: ");
+            lengthPossibleSymbols = sc.nextInt();
 
-        // construct the secret code based on the conditions (can only contain unique numbers (0-9) and doesn't start with a 0)
-        while(secret.length() != lengthCode) {
-            // generate a random number (using nanoTime for example)
-            int randomNumber = rand.nextInt((higher - lower + 1) + lower); // get a random number between 0 and 9
-
-            // break condition
-            if (secret.length() == lengthCode) {
+            if (lengthPossibleSymbols <= 36) {
                 break;
             }
 
-            if(secret.isEmpty() && randomNumber == 0) {
-                continue; // skip if the first number is 0 and secret is still empty (code can't start with 0)
-            }
+            System.out.println("Error: can't generate a secret code with more than 36 symbols");
+            System.out.println();
+        } while(lengthPossibleSymbols > 36);
 
-            // check if number doesn't exist in the secret code already, and add it (secret code has to have unique numbers)
-            if (!secret.toString().contains(String.valueOf(randomNumber))) {
-                secret.append(randomNumber);
-            }
-        }
-
-        // return secret code
-        return String.valueOf(secret);
+        CodeGenerator codeGenerator = new CodeGenerator(lengthCode, lengthPossibleSymbols);
+        System.out.println(codeGenerator.getPreparationMessage());
+        return codeGenerator.getSecretCode();
     }
 
     public static void grader(String secretCode, String userInput) {
